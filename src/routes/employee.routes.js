@@ -1,4 +1,5 @@
 import express from "express";
+import {validateEmployee} from "../middleware/validation.middleware.js";
 
 import{
     createEmployee,
@@ -12,7 +13,7 @@ import{
 const router = express.Router();
 
 //Create employee
-router.post("/", createEmployee);
+router.post("/", validateEmployee, createEmployee);
 
 //Fetch employee
 router.get("/", getEmployees);

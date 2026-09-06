@@ -74,63 +74,64 @@ export const getEmployees = async (req, res) => {
       ? "ASC"
       : "DESC";
 
-    let result;
+   let result;
 
-    if (search && department) {
-      // prepare search value with wildcards
-      const searchValue = `%${search}%`;
+        if (search && department) {
+            // prepare search value with wildcards
+            const searchValue = `%${search}%`;
 
-      result = await connection.query(
-        `SELECT * FROM employee
-         WHERE (first_name ILIKE $1
-            OR last_name ILIKE $1
-            OR email_id ILIKE $1)
-            AND department = $2
-         ORDER BY hired_at DESC
-         LIMIT $3 OFFSET $4`,
-        [searchValue, department, limitNum, offset]
-      );
+            result = await connection.query(
+                `SELECT * FROM employee
+                 WHERE (first_name ILIKE $1
+                    OR last_name ILIKE $1
+                    OR email_id ILIKE $1)
+                    AND department = $2
+                 ORDER BY ${sortColumn} ${sortOrder}
+                 LIMIT $3 OFFSET $4`,
+                [searchValue, department, limitNum, offset]
+            );
 
-    } else if (search) {
-      // search only
-      const searchValue = `%${search}%`;
+        } else if (search) {
+            // search only
+            const searchValue = `%${search}%`;
 
-      result = await connection.query(
-        `SELECT * FROM employee
-         WHERE first_name ILIKE $1
-            OR last_name ILIKE $1
-            OR email_id ILIKE $1
-         ORDER BY hired_at DESC
-         LIMIT $2 OFFSET $3`,
-        [searchValue, limitNum, offset]
-      );
+            result = await connection.query(
+                `SELECT * FROM employee
+                 WHERE first_name ILIKE $1
+                    OR last_name ILIKE $1
+                    OR email_id ILIKE $1
+                 ORDER BY ${sortColumn} ${sortOrder}
+                 LIMIT $2 OFFSET $3`,
+                [searchValue, limitNum, offset]
+            );
 
-    } else if (department) {
-      // department filter only
-      result = await connection.query(
-        `SELECT * FROM employee
-         WHERE department = $1
-         ORDER BY hired_at DESC
-         LIMIT $2 OFFSET $3`,
-        [department, limitNum, offset]
-      );
+        } else if (department) {
+            // department filter only
+            result = await connection.query(
+                `SELECT * FROM employee
+                 WHERE department = $1
+                 ORDER BY ${sortColumn} ${sortOrder}
+                 LIMIT $2 OFFSET $3`,
+                [department, limitNum, offset]
+            );
 
-    } else {
-      // no search and no department filter
-      result = await connection.query(
-        `SELECT * FROM employee
-         ORDER BY hired_at DESC
-         LIMIT $1 OFFSET $2`,
-        [limitNum, offset]
-      );
-    }
+        } else {
+            // no search and no department filter
+            result = await connection.query(
+                `SELECT * FROM employee
+                 ORDER BY ${sortColumn} ${sortOrder}
+                 LIMIT $1 OFFSET $2`,
+                [limitNum, offset]
+            );
+        }
 
-    res.status(200).json({
-      success: true,
-      data: result.rows,
-      page: pageNum,
-      limit: limitNum
-    });
+        res.status(200).json({
+            success: true,
+            data: result.rows,
+            page: pageNum,
+            limit: limitNum
+        });
+
 
 
     } catch (error) {
