@@ -1,5 +1,75 @@
 import connection from "../db/database.js";
 
+//Access of Manager
+export const getDepartmentEmployees = async(req,res)=>{
+    try{
+        //Query Manager
+        const manager = await pool.query(
+            `
+            SELECT * FROM employee
+            WHERE id = $1
+            `,
+            [req.user.employee_id]
+        );
+
+        //Manager Exists?
+        if(manager.rows.length === 0){
+            return res.status(404).json({
+                message: "Manager Not Found"
+            });
+        }
+
+
+        //Get departmentId
+        const departmentId= manager.rows[0].department_id;
+
+        //Query Employees
+        const employees = await pool.query(
+            `
+            SELECT *
+            FROM employee
+            WHERE department_id = $1
+            `,
+            [departmentId]
+        );
+
+        //RETURN employees
+        res.json(employees.rows)
+
+    }
+    catch(error){
+        res.status(500).json({
+            message: error.message
+        });
+    }
+}
+
+//Getting own profile
+export const getMyProfile = async(req,res)=>{
+    try{
+        const employeeId = req.user.employee_id;
+        const result = await pool.query(
+
+            `
+            SELECT * FROM employee
+            WHERE id=$1
+            `,[employeeId]
+        );
+            if(result.rows.length === 0){
+            return res.status(404).json({
+                message: "Employee Not Found"
+            });
+        }
+        res.json(result.rows[0]);
+
+    }
+    catch(error){
+        res.status(500).json({
+            message:error.message
+        });
+    }
+}
+
 // CREATE EMPLOYEE
 export const createEmployee = async (req, res) => {
     try {
